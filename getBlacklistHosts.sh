@@ -46,7 +46,7 @@ scriptHome="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 #filename of file which holds the various conf elements, this needs to exist in the same directory this script is running in
 dataFile="${scriptHome}/getBlacklistHosts.conf"
-cronFile="/etc/cron.d/getBlacklistHosts.sh"
+cronFile="/etc/cron.d/getBlacklistHosts"
 
 #temp file to hold mail message (deleted by script after use)
 messageFile="$(mktemp "/tmp/tmp.BlacklistMessage.txt.XXXXXX")"
@@ -89,7 +89,7 @@ function control_c() {
 #create default crontab file if it does not exist
 function check_crontab() {
     if [ ! -f ${cronFile} ]; then
-        echo -e "#This is the crontab file for ${scriptHome}/getBlacklistHosts.sh ${version}\n\ #MAILTO=""\n\ #29 1 * * * root ${scriptHome}/getBlacklistHosts.sh\n\ #@reboot    root sleep 60 && ${scriptHome}/getBlacklistHosts.sh\n"> /etc/cron.d/getBlacklistHosts.sh
+        echo -e "#This is the crontab file for ${scriptHome}/getBlacklistHosts.sh ${version}\n\ #MAILTO=""\n\ #29 1 * * * root ${scriptHome}/getBlacklistHosts.sh\n\ #@reboot    root sleep 60 && ${scriptHome}/getBlacklistHosts.sh\n">${cronFile} 
         echo " " | sendmsg
         echo ".    Created default crontab file ${cronFile} which did not exist." | sendmsg
         echo ".    Remember to uncomment the lines and adjust the timing to your needs." | sendmsg
