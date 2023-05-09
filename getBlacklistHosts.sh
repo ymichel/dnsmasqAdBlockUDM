@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.0 UDM"
+version="V1.1 UDM"
 
 #name to use for the options file that will be generated in dnsmasqHome if options found in conf file
 #variable dnsmasqOptions
@@ -164,17 +164,15 @@ listTargetPath=\"/run/getBlacklistHosts\"\n\\n\
 #Pi-hole source 1: StevenBlack list\n\
 ProvidedURLarray[pi1]=\"https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts\"\n\\n\
 #Pi-hole source 2: MalwareDomains\n\
-ProvidedURLarray[pi2]=\"https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/malware\"\n\\n\
+ProvidedURLarray[pi2]=\"https://mirror1.malwaredomains.com/files/justdomains\"\n\\n\
 #Pi-hole source 3: Cameleon\n\
 ProvidedURLarray[pi3]=\"http://sysctl.org/cameleon/hosts\"\n\\n\
-#Pi-hole source 4: Zeustracker\n\
-ProvidedURLarray[pi4]=\"https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist\"\n\\n\
-#Pi-hole source 5: Disconnect.me Tracking\n\
-ProvidedURLarray[pi5]=\"https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt\"\n\\n\
-#Pi-hole source 6: Disconnect.me Ads\n\
-ProvidedURLarray[pi6]=\"https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt\"\n\\n\
-#Pi-hole source 7: Hosts-file.net\n\
-ProvidedURLarray[pi7]=\"https://raw.githubusercontent.com/evankrob/hosts-filenetrehost/master/ad_servers.txt\"\n\\n\
+#Pi-hole source 4: Disconnect.me Tracking\n\
+ProvidedURLarray[pi4]=\"https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt\"\n\\n\
+#Pi-hole source 5: Disconnect.me Ads\n\
+ProvidedURLarray[pi5]=\"https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt\"\n\\n\
+#Pi-hole source 6: Hosts-file.net\n\
+ProvidedURLarray[pi6]=\"https://raw.githubusercontent.com/evankrob/hosts-filenetrehost/master/ad_servers.txt\"\n\\n\
 #Other source 1\n\
 ProvidedURLarray[os1]=\"http://winhelp2002.mvps.org/hosts.txt\"\n\\n\
 #Other source 2\n\

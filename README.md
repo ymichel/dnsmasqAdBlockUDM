@@ -16,7 +16,7 @@ Furthermore, the script allows for an email notification to be set up.
 To regularly, run updates, a default cron-script is also provided (disabled by default) in /etc/cron.d/
 
 # Setup
-- upload the getBlacklistHosts.sh into a persistant folder on your UDM (e.g. /data)
+- upload the getBlacklistHosts.sh into a persistant folder on your UDM (e.g. /data/dns-filter)
 - run the getBlacklistHosts.sh once to obtain a getBlacklistHosts.conf to set your parameters accordingly
 - run getBlacklistHosts.sh a second time to initially load all lists initially and activate the new block-list in the unifi scripts
 - schedule a regular run in the provided file /etc/cron.d/getBlacklistHosts (enable both lines then)
