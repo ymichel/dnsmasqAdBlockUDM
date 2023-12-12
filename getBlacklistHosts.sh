@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.1.1 UDM"
+version="V1.2 UDM"
 
 #name to use for the options file that will be generated in dnsmasqHome if options found in conf file
 #variable dnsmasqOptions
@@ -86,15 +86,30 @@ function control_c() {
     exit 4
 }
 
+function check_hook(){
+    if [ -f ${scriptHome}/reboot ]; then
+       enable_hook
+       rm ${scriptHome}/reboot
+       exit 0
+    fi
+}
+function enable_hook() {
+       /bin/sed -i "s|ADSDOMAINS=\"${listTargetPath}/fullhosts\"|ADSDOMAINS=\"${unifiblacklist}\"|" ${dnsfilterfile} | sendmsg
+       /bin/sed -i "s|log \"Ads database extracted.\".*|log \"Ads database extracted.\"; ${scriptHome}/getBlacklistHosts.sh |" ${dnsfilterfile}
+        echo " " | sendmsg
+        echo ".    Enabled hook to automatically execute each time the blacklist is updated." | sendmsg
+        echo " " | sendmsg
+}
+
 #create default crontab file if it does not exist
 function check_crontab() {
     if [ ! -f ${cronFile} ]; then
-        echo -e "#This is the crontab file for ${scriptHome}/getBlacklistHosts.sh ${version}\n\ #MAILTO=""\n\ #29 1 * * * root ${scriptHome}/getBlacklistHosts.sh\n\ #@reboot    root sleep 60 && ${scriptHome}/getBlacklistHosts.sh\n">${cronFile} 
+        echo -e "#This is the crontab file for ${scriptHome}/getBlacklistHosts.sh ${version}\n#MAILTO=""\n@reboot    root /usr/bin/touch ${scriptHome}/reboot && ${scriptHome}/getBlacklistHosts.sh\n">${cronFile} 
         echo " " | sendmsg
         echo ".    Created default crontab file ${cronFile} which did not exist." | sendmsg
-        echo ".    Remember to uncomment the lines and adjust the timing to your needs." | sendmsg
-        echo ".    It is not automatically activated but needs your action." | sendmsg
+        echo ".    It is automatically activated but only executed when your system is rebooted to (re)enable the hook." | sendmsg
         echo " " | sendmsg
+        enable_hook
     fi
 }
 
@@ -453,6 +468,7 @@ declare -A URLarray
 declare -A ProvidedURLarray
 
 source ${dataFile}
+check_hook
 
 if [ "$enableDebugging" = true ] ; then
 	echo ".    Directory for debugging: ${debugDirectory}" | sendmsg
@@ -838,18 +854,16 @@ fi
 #Cleanup.
 cleanup
 
-# Update UDM source-list to use from now on (default is /run/utm/ads.list but we want our to be used now)
+# Update UDM blacklist to use ours 
 if [ -f "${listTargetPath}/fullhosts" ]; then
-    /bin/sed -i "s|ADSDOMAINS=.*|ADSDOMAINS=\"${listTargetPath}/fullhosts\"|" ${dnsfilterfile} | sendmsg
-    echo ".    Calling UDM script to repflect update immediately." | sendmsg
-
+    #restore/reset original filter file name
+    /bin/sed -i "s|ADSDOMAINS=.*|ADSDOMAINS=\"${unifiblacklist}\"|" ${dnsfilterfile} | sendmsg
+    echo ".    Replacing UDM-blacklist by newly generated list." | sendmsg
+    cp ${listTargetPath}/fullhosts ${unifiblacklist}
     # remove udm's ads.list marker-file first to simulate its first run
     if [ -f "/run/utm/ads.list.gz.ts" ]; then
         rm /run/utm/ads.list.gz.ts
     fi
-
-    # do the actual run of the ad-blocker update in UDM
-    ${dnsfilterfile}
 fi
 
 #Send Mail

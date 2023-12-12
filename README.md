@@ -21,3 +21,8 @@ To regularly, run updates, a default cron-script is also provided (disabled by d
 - run getBlacklistHosts.sh a second time to initially load all lists initially and activate the new block-list in the unifi scripts
 - schedule a regular run in the provided file /etc/cron.d/getBlacklistHosts (enable both lines then)
 - optionally install more https://github.com/topics/adblock-list
+
+# Upgrade from versions prior to V1.2
+- remove provided cron-job
+- execute script from within its folder (e.g. cd /data/dns-filter; getBlacklistHost.sh)
+- wait for the UDM to update its lists automatically
