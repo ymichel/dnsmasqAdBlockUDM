@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.1 UDM"
+version="V1.1.1 UDM"
 
 #name to use for the options file that will be generated in dnsmasqHome if options found in conf file
 #variable dnsmasqOptions
@@ -107,6 +107,9 @@ function check_config_file() {
 #location of the whitelist. This file contains one host/domain per line that will\n\
 #be excluded from the blacklist. If the file does not exist it wll not be used.\n\\n\
 readonly whitelist=\"${scriptHome}/dnswhitelist\"\n\\n\
+#One should consider of whitelisting the following URLs:\n\
+# *.ui.com\n\
+# *.ubnt.com\n\\n\
 #Examples below show the whitelist results on these blacklist entries:\n\
 #somedomain.com\n\
 #api.somedomain.com\n\
