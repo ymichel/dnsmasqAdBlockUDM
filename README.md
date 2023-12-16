@@ -23,6 +23,15 @@ To regularly, run updates, a default cron-script is also provided (disabled by d
 - optionally install more https://github.com/topics/adblock-list
 
 # Upgrade from versions prior to V1.2
-- remove provided cron-job
-- execute script from within its folder (e.g. cd /data/dns-filter; getBlacklistHost.sh)
+- remove existing cron-job 
+- download new verion of the script 
+- make script executable 
+- execute script from within its folder 
 - wait for the UDM to update its lists automatically
+
+```
+rm /etc/cron.d/getBlacklistHosts
+curl 'https://raw.githubusercontent.com/ymichel/dnsmasqAdBlockUDM/main/getBlacklistHosts.sh' > /data/dns-filter/getBlacklistHost.sh
+chmod +x /data/dns-filter/getBlacklistHost.sh
+bash /data/dns-filter/getBlacklistHost.sh
+```
