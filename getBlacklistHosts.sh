@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.3 UDM"
+version="V1.3-UDM"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -871,9 +871,9 @@ if [ -f "${listTargetPath}/fullhosts" ]; then
 fi
 
 #Append notification of new release (optional)
-if [ $version != $release_version ] ; then
+if [ "$version" != "$release_version" ] ; then
 	echo "." | sendmsg
-	echo ".    Attention: There is a new release available on GitHub: ${}" | sendmsg
+	echo ".    Attention: There is a new release available on GitHub: ${release_version}" | sendmsg
 	echo ".               (This is ${version})" | sendmsg
 	echo "." | sendmsg
 fi

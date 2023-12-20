@@ -31,7 +31,7 @@ To regularly, run updates, a default cron-script is also provided (disabled by d
 
 ```
 rm /etc/cron.d/getBlacklistHosts
-curl 'https://raw.githubusercontent.com/ymichel/dnsmasqAdBlockUDM/main/getBlacklistHosts.sh' > /data/dns-filter/getBlacklistHost.sh
-chmod +x /data/dns-filter/getBlacklistHost.sh
+curl 'https://raw.githubusercontent.com/ymichel/dnsmasqAdBlockUDM/V1.3-UDM/getBlacklistHosts.sh' > /data/dns-filter/getBlacklistHosts.sh
+chmod +x /data/dns-filter/getBlacklistHosts.sh
 bash /data/dns-filter/getBlacklistHost.sh
 ```
