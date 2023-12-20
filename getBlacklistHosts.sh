@@ -26,7 +26,11 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.2 UDM"
+version="V1.3 UDM"
+
+#Get newest release from GitHub
+release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
+release_version=$(echo "$release_info" | grep -o '"tag_name": "[^"]*' | cut -d'"' -f4)
 
 #name to use for the options file that will be generated in dnsmasqHome if options found in conf file
 #variable dnsmasqOptions
@@ -866,6 +870,14 @@ if [ -f "${listTargetPath}/fullhosts" ]; then
     fi
 fi
 
+#Append notification of new release (optional)
+if [ $version != $release_version ] ; then
+	echo "." | sendmsg
+	echo ".    Attention: There is a new release available on GitHub: ${}" | sendmsg
+	echo ".               (This is ${version})" | sendmsg
+	echo "." | sendmsg
+fi
+
 #Send Mail
 endTime=`date +%s`
 runTimeSec=$((endTime-startTime))
@@ -896,7 +908,6 @@ if [ "$sendEmails" = true ] ; then
 	echo -e "Log from this run:" >> ${messageFooter};
 	cat ${logFile} >> ${messageFooter}
 	echo -e "</pre></body></html>" >> ${messageFooter}
-#	cat ${messageHeader} ${messageFile} ${messageFooter} | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/\x0f//g" | /usr/sbin/ssmtp ${emailtoaddr};&
 	cat ${messageHeader} ${messageFile} ${messageFooter} | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/\x0f//g" | /usr/sbin/ssmtp ${emailtoaddr}&
 fi
 
