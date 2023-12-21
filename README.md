@@ -32,7 +32,7 @@ If you have setup the email notification, the script will also check if there is
 
 ```
 rm /etc/cron.d/getBlacklistHosts
-curl 'https://raw.githubusercontent.com/ymichel/dnsmasqAdBlockUDM/V1.4-UDM/getBlacklistHosts.sh' > /data/dns-filter/getBlacklistHosts.sh
+curl 'https://raw.githubusercontent.com/ymichel/dnsmasqAdBlockUDM/V1.5-UDM/getBlacklistHosts.sh' > /data/dns-filter/getBlacklistHosts.sh
 chmod +x /data/dns-filter/getBlacklistHosts.sh
 bash /data/dns-filter/getBlacklistHosts.sh
 ```

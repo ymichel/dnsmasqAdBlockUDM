@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.4-UDM"
+version="V1.5-UDM"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -169,7 +169,6 @@ readonly userblacklist=\"${scriptHome}/dnsblacklist\"\n\
 #ignore the Unifi provided ads.list when generating\n\
 #true/false\n\
 ignore_unifiblacklist=false\n\
-enableDebugging=false\n\\n\
 \n\
 #location (directory) of the list-files _this_ script will be generating\n\
 listTargetPath=\"/run/getBlacklistHosts\"\n\
@@ -221,7 +220,11 @@ ProvidedURLarray[os2]=\"https://adaway.org/hosts.txt\"\n\\n\
 #Other source 3\n\
 ProvidedURLarray[os3]=\"https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext\"\n\\n\
 #Other source 4\n\
-ProvidedURLarray[os4]=\"https://someonewhocares.org/hosts/hosts/\"\n\
+ProvidedURLarray[os4]=\"https://someonewhocares.org/hosts/hosts/\"\n\\n\
+#Other source 5\n\
+ProvidedURLarray[os5]=\"https://raw.githubusercontent.com/Cats-Team/AdRules/main/hosts.txt\"\n\\n\
+#Other source 6\n\
+ProvidedURLarray[os6]=\"https://raw.githubusercontent.com/easylist/easylist/master/easylist/easylist_adservers.txt\"\n\
 \n\
 #What is the time limit (in seconds) for each file download?\n\
 #This is to set a limit for curl when downloading from each source.\n\
@@ -891,11 +894,23 @@ if [ -f "${listTargetPath}/fullhosts" ]; then
     fi
 fi
 
+# Derive version of conf-file creation
+conf_version=$(head -1 ${dataFile} | awk 'NF>1{print $NF}')
+
+#Append notification of possible conf file updated pending
+if [ "${version}" != "${conf_version}" ]; then 
+	echo "." | sendmsg
+	echo ".    Notice: Your conf file ${datafile} is possibly outdated. " | sendmsg
+	echo ".            It was setup in ${conf_version} but this script runs at ${version}" | sendmsg
+	echo "." | sendmsg
+	echo ".            To update, please move it to a backup-file, run this script and adjust your settings." | sendmsg
+	echo "." | sendmsg
+fi
 #Append notification of new release (optional)
 if [ "$version" != "$release_version" ] ; then
 	echo "." | sendmsg
-	echo ".    Attention: There is a new release available on GitHub: ${release_version}" | sendmsg
-	echo ".               (This is ${version})" | sendmsg
+	echo ".    Notice: There is a new release available on GitHub: ${release_version}" | sendmsg
+	echo ".            (This is ${version})" | sendmsg
 	echo "." | sendmsg
 fi
 
