@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.3-UDM"
+version="V1.4-UDM"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -38,6 +38,9 @@ optionsFileName="getBlacklistOptions.conf"
 
 #place where the blacklist is processed from (default is /usr/share/ubios-udapi-server/ips/bin/getsig.sh)
 dnsfilterfile="/usr/share/ubios-udapi-server/ips/bin/getsig.sh"
+
+#location of the unifiblacklist to be replaced by the combined list
+unifi_blacklist="/run/utm/ads.list"
 
 #get the scripts current home
 SOURCE="${BASH_SOURCE}"
@@ -98,7 +101,7 @@ function check_hook(){
     fi
 }
 function enable_hook() {
-       /bin/sed -i "s|ADSDOMAINS=\"${listTargetPath}/fullhosts\"|ADSDOMAINS=\"${unifiblacklist}\"|" ${dnsfilterfile} | sendmsg
+       /bin/sed -i "s|ADSDOMAINS=\"${listTargetPath}/fullhosts\"|ADSDOMAINS=\"${unifi_blacklist}\"|" ${dnsfilterfile} | sendmsg
        /bin/sed -i "s|log \"Ads database extracted.\".*|log \"Ads database extracted.\"; ${scriptHome}/getBlacklistHosts.sh |" ${dnsfilterfile}
         echo " " | sendmsg
         echo ".    Enabled hook to automatically execute each time the blacklist is updated." | sendmsg
@@ -122,55 +125,70 @@ function check_config_file() {
     if [ ! -f ${dataFile} ]; then
         echo -e "#This is the user configuration file for ${scriptHome}/getBlacklistHosts.sh ${version}\n\
 \n\
-\n\
 #location of the whitelist. This file contains one host/domain per line that will\n\
-#be excluded from the blacklist. If the file does not exist it wll not be used.\n\\n\
-readonly whitelist=\"${scriptHome}/dnswhitelist\"\n\\n\
+#be excluded from the blacklist. If the file does not exist it wll not be used.\n\
+\n\
+readonly whitelist=\"${scriptHome}/dnswhitelist\"\n\
+\n\
 #One should consider of whitelisting the following URLs:\n\
 # *.ui.com\n\
-# *.ubnt.com\n\\n\
+# *.ubnt.com\n\
+\n\
 #Examples below show the whitelist results on these blacklist entries:\n\
 #somedomain.com\n\
 #api.somedomain.com\n\
 #cdn.somedomain.com\n\
-#events.somedomain.com\n\\n\
+#events.somedomain.com\n\
+\n\
 #no dnswhitelist entry:\n\
-#entire somedomain.com is blocked due to 'somedomain.com' being included in the blacklist data\n\\n\
+#entire somedomain.com is blocked due to 'somedomain.com' being included in the blacklist data\n\
+\n\
 #dnswhitelist entry: *somedomain.com (note no dot between * and domain name)\n\
 #resulting blacklist entries:\n\
-#none - entire domain whitelisted\n\\n\
+#none - entire domain whitelisted\n\
+\n\
 #dnswhitelist entry: somedomain.com\n\
 #resulting blacklist entries:\n\
 #api.somedomain.com\n\
 #cdn.somedomain.com\n\
-#events.somedomain.com\n\\n\
+#events.somedomain.com\n\
+\n\
 #dnswhitelist entry: api.somedomain.com - this one subdomain will be whitelisted\n\
 #resulting blacklist entries:\n\
 #somedomain.com\n\
 #cdn.somedomain.com\n\
-#events.somedomain.com\n\\n\\n\\n\\n\
+#events.somedomain.com\n\
+\n\
 #location of the user-defined blacklist. This file contains one host/domain per line that will\n\
 #be included in the final blacklist. If the file does not exist it will not be used.\n\
 #If a domain is listed the entire domain and all subdomains will be blocked.\n\
 #If a subdomain or specific host is listed, only that will be blocked.\n\
 #This does not use the * to denote a domain as the whitelist does.\n\
-readonly userblacklist=\"${scriptHome}/dnsblacklist\"\n\\n\
-#location of the Unifi provided ads.list\n\
-unifiblacklist=\"/run/utm/ads.list\"\n\\n\\n\
+readonly userblacklist=\"${scriptHome}/dnsblacklist\"\n\
+\n\
+#ignore the Unifi provided ads.list when generating\n\
+#true/false\n\
+ignore_unifiblacklist=false\n\
+enableDebugging=false\n\\n\
+\n\
 #location (directory) of the list-files _this_ script will be generating\n\
-listTargetPath=\"/run/getBlacklistHosts\"\n\\n\
+listTargetPath=\"/run/getBlacklistHosts\"\n\
+\n\
 #user-defined source URLs\n\
 #you can add your own source URLs here from which the script will download\n\
 #additional blacklist entries. You can have as may as you like.\n\
 #If no URLs are defined it will be skipped during processing.\n\
-#This URL can be a zip file containing one or more files.\n\\n\
+#This URL can be a zip file containing one or more files.\n\
+\n\
 #user-defined source URL format is:\n\
 #URLarray[uniqueLabel]=\"sourceUrl\"\n\
 #where uniqueLabel is a unique (per URL) character string with no spaces or extended characters and\n\
-#sourceUrl is the URL to pull from.\n\\n\
+#sourceUrl is the URL to pull from.\n\
+\n\
 #example:\n\
 #URLarray[site1]=\"https://TestMyLocalUDMsDNS.com/badhosts\"\n\
-#URLarray[site2]=\"https://TestMyLocalUDMsDNS2.com/morebadhosts\"\n\\n\\n\\n\\n\
+#URLarray[site2]=\"https://TestMyLocalUDMsDNS2.com/morebadhosts\"\n\
+\n\
 #script-provided source URLs\n\
 #These are the source URLs that come with this script.\n\
 #The first entries are the pi-hole sources listed at\n\
@@ -182,7 +200,8 @@ listTargetPath=\"/run/getBlacklistHosts\"\n\\n\
 #To remove sources simply comment out the line with a leading #.\n\
 #To add sources please add them to the user-defined section above.\n\
 #This is to ensure that if future updates contain more sources they can be added\n\
-#via the script during the update process and not confict with any user made changes.\n\\n\
+#via the script during the update process and not confict with any user made changes.\n\
+\n\
 #Pi-hole source 1: StevenBlack list\n\
 ProvidedURLarray[pi1]=\"https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts\"\n\\n\
 #Pi-hole source 2: MalwareDomains\n\
@@ -202,13 +221,15 @@ ProvidedURLarray[os2]=\"https://adaway.org/hosts.txt\"\n\\n\
 #Other source 3\n\
 ProvidedURLarray[os3]=\"https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext\"\n\\n\
 #Other source 4\n\
-ProvidedURLarray[os4]=\"https://someonewhocares.org/hosts/hosts/\"\n\\n\
+ProvidedURLarray[os4]=\"https://someonewhocares.org/hosts/hosts/\"\n\
+\n\
 #What is the time limit (in seconds) for each file download?\n\
 #This is to set a limit for curl when downloading from each source.\n\
 #Without a limit curl would wait forever for a file to finish.\n\
 #This sets the --max-time parameter for curl.\n\
 #If you have a slower connection, you may need to increase the default 60 seconds.\n\
-curlMaxTime=\"60\"\n\\n\
+curlMaxTime=\"60\"\n\
+\n\
 #What IP address do you want the blocked hosts to resolve to?\n\
 #0.0.0.0 is the default setting.\n\
 #This has to be a valid IP address, not URL or hostname.\n\
@@ -494,13 +515,13 @@ echo "#debugging: getBlacklistHosts.sh Testing record start" > "${sTmpNewHosts}"
 echo "testMyLocalUDMsDNS.com" >> "${sTmpNewHosts}"
 echo "#debugging: getBlacklistHosts.sh Testing record end" >> "${sTmpNewHosts}"
 
-if [ ! -f "${unifiblacklist}" ] ; then
-	echo ".    Not using the unifi-default blacklist..." | sendmsg
+if [ "${ignore_unifiblacklist}" = true ] ; 
+    echo ".    Not using the unifi-default blacklist..." | sendmsg
 else
     echo ".    Adding the unifi-default blacklist..." | sendmsg
 	echo "#debugging: unifi-default blacklist records start" >> "${sTmpNewHosts}"
 	lastCount=$(wc -l < ${sTmpNewHosts});
-	cat ${unifiblacklist} >> "${sTmpNewHosts}"
+	cat ${unifi_blacklist} >> "${sTmpNewHosts}"
 	thisCount=$(wc -l < ${sTmpNewHosts})
 	echo ".    Got "$((thisCount-lastCount))" records. Raw data count now: "${thisCount}| sendmsg
 	echo "#debugging: unifi-default blacklist records end" >> "${sTmpNewHosts}"
@@ -861,9 +882,9 @@ cleanup
 # Update UDM blacklist to use ours 
 if [ -f "${listTargetPath}/fullhosts" ]; then
     #restore/reset original filter file name
-    /bin/sed -i "s|ADSDOMAINS=.*|ADSDOMAINS=\"${unifiblacklist}\"|" ${dnsfilterfile} | sendmsg
+    /bin/sed -i "s|ADSDOMAINS=.*|ADSDOMAINS=\"${unifi_blacklist}\"|" ${dnsfilterfile} | sendmsg
     echo ".    Replacing UDM-blacklist by newly generated list." | sendmsg
-    cp ${listTargetPath}/fullhosts ${unifiblacklist}
+    cp ${listTargetPath}/fullhosts ${unifi_blacklist}
     # remove udm's ads.list marker-file first to simulate its first run
     if [ -f "/run/utm/ads.list.gz.ts" ]; then
         rm /run/utm/ads.list.gz.ts
