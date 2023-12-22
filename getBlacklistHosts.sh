@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.5-UDM"
+version="V1.5-UDM-1"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -297,7 +297,7 @@ historycountFile=\"${scriptHome}/BlacklistHistoryCount.txt\"\n\\n\
 function check_dependencies() {
     echo ".    Checking dependencies for getBlacklistHosts ${version}..." | sendmsg
     #Sanity check to ensure all script dependencies are met.
-    for cmd in cat curl date mktemp pkill rm sed sort uniq grep; do
+    for cmd in cat curl date mktemp pkill rm sed  awk sort uniq grep; do
         if ! type "${cmd}" &> /dev/null; then
             bError=true
             echo ".      This script requires the command '${cmd}' to run. Install '${cmd}', make it available in \$PATH and try again." | sendmsg
@@ -518,7 +518,7 @@ echo "#debugging: getBlacklistHosts.sh Testing record start" > "${sTmpNewHosts}"
 echo "testMyLocalUDMsDNS.com" >> "${sTmpNewHosts}"
 echo "#debugging: getBlacklistHosts.sh Testing record end" >> "${sTmpNewHosts}"
 
-if [ "${ignore_unifiblacklist}" = true ];  then
+if [ "${ignore_unifiblacklist}" = true ]; then
     echo ".    Not using the unifi-default blacklist..." | sendmsg
 else
     echo ".    Adding the unifi-default blacklist..." | sendmsg
