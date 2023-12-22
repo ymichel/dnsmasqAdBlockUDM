@@ -518,7 +518,7 @@ echo "#debugging: getBlacklistHosts.sh Testing record start" > "${sTmpNewHosts}"
 echo "testMyLocalUDMsDNS.com" >> "${sTmpNewHosts}"
 echo "#debugging: getBlacklistHosts.sh Testing record end" >> "${sTmpNewHosts}"
 
-if [ "${ignore_unifiblacklist}" = true ] ; 
+if [ "${ignore_unifiblacklist}" = true ];  then
     echo ".    Not using the unifi-default blacklist..." | sendmsg
 else
     echo ".    Adding the unifi-default blacklist..." | sendmsg
