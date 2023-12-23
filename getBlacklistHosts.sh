@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.5-UDM-1"
+version="V1.6.0"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -910,12 +910,25 @@ conf_version=$(head -1 ${dataFile} | awk 'NF>1{print $NF}')
 
 #Append notification of possible conf file updated pending
 if [ "${version}" != "${conf_version}" ]; then 
-	echo "." | sendmsg
-	echo ".    Notice: Your conf file ${datafile} is possibly outdated. " | sendmsg
-	echo ".            It was setup in ${conf_version} but this script runs at ${version}" | sendmsg
-	echo "." | sendmsg
-	echo ".            To update, please move it to a backup-file, run this script and adjust your settings." | sendmsg
-	echo "." | sendmsg
+	case "${conf_version}" in
+		"V1.5-UDM")
+			echo "." | sendmsg
+			;;
+		"V1.5-UDM-1")
+			echo "." | sendmsg
+			;;
+		"V1.6.0")
+			echo "." | sendmsg
+			;;
+		*)
+			echo "." | sendmsg
+			echo ".    Notice: Your conf file ${datafile} is possibly outdated. " | sendmsg
+			echo ".            It was setup in ${conf_version} but this script runs at ${version}" | sendmsg
+			echo "." | sendmsg
+			echo ".            To update, please move it to a backup-file, run this script and adjust your settings." | sendmsg
+			echo "." | sendmsg
+			;;
+	esac
 fi
 #Append notification of new release (optional)
 if [ "$version" != "$release_version" ] ; then
