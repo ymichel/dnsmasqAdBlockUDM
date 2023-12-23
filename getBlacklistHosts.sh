@@ -93,19 +93,30 @@ function control_c() {
     exit 4
 }
 
-function check_hook(){
-    if [ -f ${scriptHome}/reboot ]; then
-       enable_hook
-       rm ${scriptHome}/reboot
-       exit 0
-    fi
-}
 function enable_hook() {
        /bin/sed -i "s|ADSDOMAINS=\"${listTargetPath}/fullhosts\"|ADSDOMAINS=\"${unifi_blacklist}\"|" ${dnsfilterfile} | sendmsg
        /bin/sed -i "s|log \"Ads database extracted.\".*|log \"Ads database extracted.\"; ${scriptHome}/getBlacklistHosts.sh |" ${dnsfilterfile}
         echo " " | sendmsg
         echo ".    Enabled hook to automatically execute each time the blacklist is updated." | sendmsg
         echo " " | sendmsg
+}
+
+function tweak_dnsmasq(){
+    # replace # as default IP by 0.0.0.0 or :: respectively
+    sed -i 's|echo "address=/$DOMAIN/#" >> "${ADSRUNPREFIX}/adsblockipv6.list.tmp"|echo "address=/$DOMAIN/::">> "${ADSRUNPREFIX}/adsblockipv6.list.tmp"|' /usr/share/ubios-udapi-server/ips/bin/getsig.sh
+    sed -i 's|echo "address=/$DOMAIN/#" >> "${ADSRUNPREFIX}/adsblockipv4.list.tmp"|echo "address=/$DOMAIN/0.0.0.0" >> "${ADSRUNPREFIX}/adsblockipv4.list.tmp"|' /usr/share/ubios-udapi-server/ips/bin/getsig.sh
+
+    # get rid of dnsmasq caching entries
+    echo "clear-on-reload" >/etc/dnsmasq.d/clear-on-reload
+}
+
+function check_hook(){
+    if [ -f ${scriptHome}/reboot ]; then
+       enable_hook
+       rm ${scriptHome}/reboot
+       tweak_dnsmasq
+       exit 0
+    fi
 }
 
 #create default crontab file if it does not exist
