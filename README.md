@@ -3,7 +3,8 @@ dnsmasq based Ad blocking for Unifi equipment (UDM-SE & UDM-PRO)
 
 This is the extension script for the provided ad-block feature for the UDM (as of version 3.0.13 or above).
 Since the provided list is something like "a secret" and does not allow to be enhanced or is any transparent, I started to investigate how it was working.
-Finally, I made it to incorporate the former ad-block-solution from my USG.
+Finally, I made it to incorporate the former ad-block-solution from my USG. 
+Sometimes, the provided lists do contain invalid DNS entries. Hence, I added a validation routine according to RFC 1123.
 
 You can now add 
 - the default PI-Hole lists, 
