@@ -26,7 +26,7 @@
 ## If it does not exist, run this script to create it, then edit it (if desired).
 
 #Version of this script
-version="V1.6.0"
+version="V1.7.0"
 
 #Get newest release from GitHub
 release_info=$(curl -s "https://api.github.com/repos/ymichel/dnsmasqAdBlockUDM/releases/latest")
@@ -75,7 +75,7 @@ declare -i iBlackListCount=0
 function cleanup() {
     #Removes temporary files created during this scripts execution.
     echo ".    Purging temporary files..." | sendmsg
-    rm -f "${sTmpNewHosts}" "${sTmpAdHosts}" "${sTmpShallaMD5}" "${sTmpDomainss}" "${sTmpSubFilters}" "${sTmpCleaneds}" "${sTmpWhiteDomains}" "${sTmpDomains2s}" "${sTmpWhiteHosts}" "${sTmpWhiteNoneWild}" "${sTmpWhiteNonSub}" "${sTmpCurlDown}"
+    rm -f "${sTmpNewHosts}" "${sTmpAdHosts}" "${sTmpShallaMD5}" "${sTmpValidDomains}" "${sTmpDomainss}" "${sTmpSubFilters}" "${sTmpCleaneds}" "${sTmpWhiteDomains}" "${sTmpDomains2s}" "${sTmpWhiteHosts}" "${sTmpWhiteNoneWild}" "${sTmpWhiteNonSub}" "${sTmpCurlDown}"
 }
 
 function cleanupOthers() {
@@ -351,6 +351,7 @@ check_dependencies
 readonly sTmpNewHosts="$(mktemp "/tmp/tmp.newhosts.XXXXXX")"
 readonly sTmpAdHosts="$(mktemp "/tmp/tmp.adhosts.XXXXXX")"
 readonly sTmpDomainss="$(mktemp "/tmp/tmp.addomains.XXXXXX")"
+readonly sTmpValidDomains="$(mktemp "/tmp/tmp.validdomains.XXXXXX")"
 readonly sTmpSubFilters="$(mktemp "/tmp/tmp.subFilters.XXXXXX")"
 readonly sTmpDomains2s="$(mktemp "/tmp/tmp.addomains2.XXXXXX")"
 readonly sTmpCleaneds="$(mktemp "/tmp/tmp.cleaned.XXXXXX")"
@@ -397,6 +398,14 @@ fi
 
 if [ ! -w "${sTmpAdHosts}" ]; then
     echo "Failed to create temporary file sTmpAdHosts" | sendmsg
+    echo "This probably means the filesystem is full or read-only." | sendmsg
+    cleanup
+	cleanupOthers
+    exit 2
+fi
+
+if [ ! -w "${sTmpValidDomains}" ]; then
+    echo "Failed to create temporary file sTmpValidDomains" | sendmsg
     echo "This probably means the filesystem is full or read-only." | sendmsg
     cleanup
 	cleanupOthers
@@ -763,6 +772,26 @@ cat ${sTmpCleaneds} >> ${sTmpDomainss}
 
 #safety check remove any blank lines and lines with no dot
 /bin/sed -i '/^[^.]*$/d' ${sTmpDomainss}
+
+#remove entries not matching proper DNS format
+#RFC 1123 replaces RFC 952 which was ^([a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]\.)+[a-zA-Z]{2,}$
+validate="^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$"
+echo ".    DNS hostname well-formedness validation..." | sendmsg
+
+for line in `cat ${sTmpDomainss}`
+do  
+    if [[ "$line" =~ $validate ]]; then 
+        echo $line >> ${sTmpValidDomains}
+        if [ "$enableDebugging" = true ] ; then
+            echo "$line" >> ${debugDirectory}/validDNS
+        fi
+    else 
+        if [ "$enableDebugging" = true ] ; then
+            echo "$line" >> ${debugDirectory}/invalidDNS
+        fi
+    fi
+done
+cat ${sTmpValidDomains} > ${sTmpDomainss}
 
 #replace our original list with the cleaned list
 cat ${sTmpDomainss} > ${sTmpAdHosts}
