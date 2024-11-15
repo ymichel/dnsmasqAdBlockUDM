@@ -19,6 +19,7 @@ If you have setup the email notification, the script will also check if there is
 
 # Setup
 - upload the getBlacklistHosts.sh into a persistant folder on your UDM (e.g. /data/dns-filter)
+- make the script executable 
 - run the getBlacklistHosts.sh once to obtain a getBlacklistHosts.conf to set your parameters accordingly
 - run getBlacklistHosts.sh a second time to initially load all lists initially and activate the new block-list in the unifi scripts
 - optionally install more https://github.com/topics/adblock-list
