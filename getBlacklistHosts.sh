@@ -997,7 +997,7 @@ if [ "$sendEmails" = true ] ; then
 	echo -e "Log from this run:" >> ${messageFooter};
 	cat ${logFile} >> ${messageFooter}
 	echo -e "</pre></body></html>" >> ${messageFooter}
-	cat ${messageHeader} ${messageFile} ${messageFooter} | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/\x0f//g" | /usr/sbin/ssmtp ${emailtoaddr}&
+	cat ${messageHeader} ${messageFile} ${messageFooter} | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | sed "s/\x0f//g" | /usr/sbin/ssmtp ${emailtoaddr}
 fi
 
 echo -e "\n" >> ${logFile};
